@@ -11,16 +11,28 @@ pool:
 
 steps:
   - task: DotNetCoreCLI@2
-    displayName: 'Dot Net Core Build'
+    displayName: 'DotNet Core Build'
     inputs:
       command: build
       projects: '**/*web/*.csproj'
-      configuration: $(buildconfiguration)
-      
+      configuration: $(buildConfiguration)
+  
   - task: DotNetCoreCLI@2
-    displayName: 'Run tests'
+    displayName: 'Run Test'
     inputs:
-      command: test
-      projects: '**/*Tests/*.csproj'
-      arguments: '--configuration $(buildconfiguration) --collect: "XPlat Code Coverage" --RunConfiguration.DisableAppDomain=true'
+      command: 'test'
+      arguments: '--configuration $(buildConfiguration) --collect:"XPlat Code Coverage" -- RunConfiguration.DisableAppDomain=true'
       publishTestResults: true
+      projects: '**/*Tests/*.csproj'
+
+  - script: 'dotnet tool install --global dotnet-reportgenerator-globaltool --version 4.5.8'  
+    displayName: 'Install ReportGenerator tool' 
+
+  - script: 'reportgenerator -reports:$(Agent.TempDirectory)/**/coverage.cobertura.xml -targetdir:$(Build.SourcesDirectory)/coverlet/reports -reporttypes:"Cobertura"'  
+    displayName: 'Create reports' 
+  
+  - task: PublishCodeCoverageResults@1  
+    displayName: 'Publish code coverage'  
+    inputs:  
+      codeCoverageTool: Cobertura  
+      summaryFileLocation: '$(Build.SourcesDirectory)/coverlet/reports/Cobertura.xml'
