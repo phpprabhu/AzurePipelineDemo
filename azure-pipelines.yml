@@ -56,5 +56,5 @@ steps:
     inputs:
       azureSubscription: 'prabhu-dotnet'
       appType: 'webApp'
-      appName: 'dotnetazdemo'
+      appName: 'prabhuDevOps'
       package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
